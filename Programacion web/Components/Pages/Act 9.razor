@@ -1,0 +1,89 @@
+﻿@page "/Actividad9"
+@rendermode InteractiveServer
+
+<!-- Título de la interfaz de usuario -->
+<h3 class="mb-4">Conocer los días del mes</h3>
+
+<!-- Formulario para la captura de datos -->
+<div class="row mb-3 align-items-center">
+    <div class="col-sm-1">
+        <label for="inputMes" class="col-form-label">Mes</label>
+    </div>
+    <div class="col-sm-4">
+        <!-- Input enlazado a la propiedad 'Mes' -->
+        <input type="number" id="inputMes" class="form-control" @bind="Mes" min="1" max="12" />
+    </div>
+</div>
+
+<div class="row mb-3 align-items-center">
+    <div class="col-sm-1">
+        <label for="inputAnio" class="col-form-label">Año</label>
+    </div>
+    <div class="col-sm-4">
+        <!-- Input enlazado a la propiedad 'Anio' -->
+        <input type="number" id="inputAnio" class="form-control" @bind="Anio" min="1" />
+    </div>
+</div>
+
+<!-- Botón para ejecutar el cálculo -->
+<button class="btn btn-primary mb-4" @onclick="CalcularDias">Calcular</button>
+
+<!-- Sección para mostrar el resultado dinámicamente -->
+@if (MostrarResultado)
+{
+    <h4>El mes @Mes del año @Anio tiene @DiasCalculados días</h4>
+}
+
+@code {
+    // Propiedades vinculadas a la interfaz
+    private int? Mes { get; set; }
+    private int? Anio { get; set; }
+    
+    // Variables para almacenar la respuesta
+    private int DiasCalculados { get; set; }
+    private bool MostrarResultado { get; set; } = false;
+
+    // Método que se ejecuta al hacer clic en el botón "Calcular"
+    private void CalcularDias()
+    {
+        // Validación básica para evitar valores nulos o meses inexistentes
+        if (Mes == null || Anio == null || Mes < 1 || Mes > 12 || Anio < 1)
+        {
+            MostrarResultado = false;
+            return;
+        }
+
+        int mesSeleccionado = Mes.Value;
+        int anioSeleccionado = Anio.Value;
+
+        // Regla 1: Meses con 31 días
+        if (mesSeleccionado == 1 || mesSeleccionado == 3 || mesSeleccionado == 5 ||
+            mesSeleccionado == 7 || mesSeleccionado == 8 || mesSeleccionado == 10 || mesSeleccionado == 12)
+        {
+            DiasCalculados = 31;
+        }
+        // Regla 2: Meses con 30 días
+        else if (mesSeleccionado == 4 || mesSeleccionado == 6 || mesSeleccionado == 9 || mesSeleccionado == 11)
+        {
+            DiasCalculados = 30;
+        }
+        // Regla 3: Febrero (28 o 29 días dependiendo si es bisiesto)
+        else if (mesSeleccionado == 2)
+        {
+            // Un año es bisiesto cuando es múltiplo de 4 y no de 100, o cuando es múltiplo de 400.
+            bool esBisiesto = (anioSeleccionado % 4 == 0 && anioSeleccionado % 100 != 0) || (anioSeleccionado % 400 == 0);
+            
+            if (esBisiesto)
+            {
+                DiasCalculados = 29;
+            }
+            else
+            {
+                DiasCalculados = 28;
+            }
+        }
+
+        // Activamos la bandera para que el HTML muestre el mensaje de respuesta
+        MostrarResultado = true;
+    }
+}

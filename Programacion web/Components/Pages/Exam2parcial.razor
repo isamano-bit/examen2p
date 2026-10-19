@@ -1,0 +1,186 @@
+﻿@page "/Registro_productos"
+@using System.Collections.Generic
+@rendermode InteractiveServer
+<h3>Registro de productos</h3>
+
+<!-- Campo: No. de inventario -->
+<div class="mb-3">
+    <label class="form-label">No. de inventario</label>
+    <input type="number" class="form-control" @bind="noInventario" />
+</div>
+
+<!-- Campo: Descripción -->
+<div class="mb-3">
+    <label class="form-label">Descripción</label>
+    <input type="text" class="form-control" placeholder="Escribe la descripción del producto" @bind="descripcion" />
+</div>
+
+<!-- Campo: Departamento -->
+<div class="mb-3">
+    <label class="form-label d-block">Departamento</label>
+    <div class="form-check form-check-inline">
+        <input class="form-check-input" type="radio" name="deptoGroup" id="frutas" value="Frutas"
+               checked="@(departamento == "Frutas")" @onchange="@(() => departamento = "Frutas")" />
+        <label class="form-check-label" for="frutas">Frutas</label>
+    </div>
+    <div class="form-check form-check-inline">
+        <input class="form-check-input" type="radio" name="deptoGroup" id="verduras" value="Verduras"
+               checked="@(departamento == "Verduras")" @onchange="@(() => departamento = "Verduras")" />
+        <label class="form-check-label" for="verduras">Verduras</label>
+    </div>
+    <div class="form-check form-check-inline">
+        <input class="form-check-input" type="radio" name="deptoGroup" id="lacteos" value="Lácteos"
+               checked="@(departamento == "Lácteos")" @onchange="@(() => departamento = "Lácteos")" />
+        <label class="form-check-label" for="lacteos">Lácteos</label>
+    </div>
+</div>
+
+<!-- Botones principales -->
+<div class="mb-3">
+    <button class="btn btn-success me-1" @onclick="GuardarDatos">Guardar datos</button>
+    <button class="btn btn-success me-1" @onclick="MostrarListaCompleta">Lista completa</button>
+    <button class="btn btn-success me-1" @onclick='() => MostrarListaPorDepartamento("Frutas")'>Lista de frutas</button>
+    <button class="btn btn-success me-1" @onclick='() => MostrarListaPorDepartamento("Verduras")'>Lista de verduras</button>
+    <button class="btn btn-success me-1" @onclick='() => MostrarListaPorDepartamento("Lácteos")'>Lista de lácteos</button>
+</div>
+
+<!-- Mensaje de alerta para errores -->
+@if (!string.IsNullOrEmpty(mensajeError))
+{
+    <div class="alert alert-danger" role="alert">
+        @mensajeError
+    </div>
+}
+
+<!-- Tabla de resultados -->
+@if (mostrarTabla)
+{
+    <table class="table table-striped table-bordered mt-3">
+        <thead>
+            <tr>
+                <th>No. Inventario</th>
+                <th>Descripción</th>
+                <th>Departamento</th>
+            </tr>
+        </thead>
+        <tbody>
+            @* Uso del ciclo foreach para iterar sobre la lista cargada *@
+            @foreach (var fila in listaFiltrada)
+            {
+                <tr>
+                    <td>@fila[0]</td>
+                    <td>@fila[1]</td>
+                    <td>@fila[2]</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <button class="btn btn-success mt-2" @onclick="CerrarLista">Cerrar lista</button>
+}
+
+@code {
+    // Campos del formulario
+    private int noInventario = 0;
+    private string descripcion = "";
+    private string departamento = "Frutas";
+    private string mensajeError = "";
+
+    // Estructuras de datos en memoria utilizando Listas sin usar clases/objetos personalizados
+    private List<int> listaInventarios = new List<int>();
+    private List<string> listaDescripciones = new List<string>();
+    private List<string> listaDepartamentos = new List<string>();
+
+    // Estado de la tabla y datos a desplegar
+    private bool mostrarTabla = false;
+    private List<string[]> listaFiltrada = new List<string[]>();
+
+    // Guardar datos con validación del No. de Inventario[cite: 1]
+    private void GuardarDatos()
+    {
+        mensajeError = "";
+
+        // Uso del ciclo WHILE para validar si el número de inventario ya existe[cite: 1]
+        bool existe = false;
+        int i = 0;
+        while (i < listaInventarios.Count)
+        {
+            if (listaInventarios[i] == noInventario)
+            {
+                existe = true;
+                break;
+            }
+            i++;
+        }
+
+        if (existe)
+        {
+            mensajeError = "El número de inventario ya existe. Debe ser único.";
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(descripcion))
+        {
+            mensajeError = "Por favor ingrese una descripción.";
+            return;
+        }
+
+        // Almacenar en las listas de memoria
+        listaInventarios.Add(noInventario);
+        listaDescripciones.Add(descripcion);
+        listaDepartamentos.Add(departamento);
+
+        // Limpiar campos
+        noInventario = 0;
+        descripcion = "";
+        departamento = "Frutas";
+    }
+
+    // Mostrar el listado completo de los productos[cite: 1]
+    private void MostrarListaCompleta()
+    {
+        mensajeError = "";
+        listaFiltrada.Clear();
+
+        // Uso del ciclo FOR para recorrer los elementos paralelos[cite: 1]
+        for (int index = 0; index < listaInventarios.Count; index++)
+        {
+            listaFiltrada.Add(new string[] {
+                listaInventarios[index].ToString(),
+                listaDescripciones[index],
+                listaDepartamentos[index]
+            });
+        }
+
+        mostrarTabla = true;
+    }
+
+    // Mostrar el listado por cada departamento específico[cite: 1]
+    private void MostrarListaPorDepartamento(string deptoFiltro)
+    {
+        mensajeError = "";
+        listaFiltrada.Clear();
+
+        // Uso del ciclo FOR para filtrar por departamento[cite: 1]
+        for (int index = 0; index < listaDepartamentos.Count; index++)
+        {
+            if (listaDepartamentos[index] == deptoFiltro)
+            {
+                listaFiltrada.Add(new string[] {
+                    listaInventarios[index].ToString(),
+                    listaDescripciones[index],
+                    listaDepartamentos[index]
+                });
+            }
+        }
+
+        mostrarTabla = true;
+    }
+
+    // Quitar/Ocultar el listado de productos[cite: 1]
+    private void CerrarLista()
+    {
+        mostrarTabla = false;
+        listaFiltrada.Clear();
+    }
+}

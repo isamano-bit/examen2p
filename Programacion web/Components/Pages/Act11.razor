@@ -1,0 +1,87 @@
+﻿@page "/actividad11"
+@rendermode InteractiveServer
+
+<!-- Título principal -->
+<h3 class="mb-4">Listas de numeros</h3>
+
+<!-- Controles de captura -->
+<Exam2parcial />
+<div class="row mb-3 align-items-center">
+    <div class="col-sm-2">
+        <label for="inputNum1" class="col-form-label">Número 1</label>
+    </div>
+    <div class="col-sm-4">
+        <input type="number" id="inputNum1" class="form-control" @bind="Numero1" />
+    </div>
+</div>
+
+<div class="row mb-4 align-items-center">
+    <div class="col-sm-2">
+        <label for="inputNum2" class="col-form-label">Número 2</label>
+    </div>
+    <div class="col-sm-4">
+        <input type="number" id="inputNum2" class="form-control" @bind="Numero2" />
+    </div>
+</div>
+
+<!-- Botón de acción -->
+<button class="btn btn-primary mb-4" @onclick="Calcular">Calcular</button>
+
+<!-- Área de resultados dividida en dos columnas -->
+<div class="row">
+    <!-- Columna Izquierda: Pares -->
+    <div class="col-sm-6">
+        <h4 class="mb-3">Pares</h4>
+        @foreach (var par in Pares)
+        {
+            <div class="p-2 mb-2 rounded" style="background-color: #f2f2f2;">
+                @par
+            </div>
+        }
+    </div>
+    
+    <!-- Columna Derecha: Impares -->
+    <div class="col-sm-6">
+        <h4 class="mb-3">Impares</h4>
+        @foreach (var impar in Impares)
+        {
+            <div class="p-2 mb-2 rounded" style="background-color: #f2f2f2;">
+                @impar
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    // Variables enlazadas a los inputs
+    private int Numero1 { get; set; }
+    private int Numero2 { get; set; }
+    
+    // Listas para almacenar los resultados clasificados
+    private List<int> Pares { get; set; } = new();
+    private List<int> Impares { get; set; } = new();
+
+    private void Calcular()
+    {
+        // Limpieza de datos de cálculos anteriores
+        Pares.Clear();
+        Impares.Clear();
+
+        // Determinación del rango ascendente
+        int minimo = Math.Min(Numero1, Numero2);
+        int maximo = Math.Max(Numero1, Numero2);
+
+        // Iteración y clasificación matemática
+        for (int i = minimo; i <= maximo; i++)
+        {
+            if (i % 2 == 0)
+            {
+                Pares.Add(i);
+            }
+            else
+            {
+                Impares.Add(i);
+            }
+        }
+    }
+}
